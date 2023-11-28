@@ -1,14 +1,30 @@
-# invisible-watermark
-[![PyPI](https://img.shields.io/pypi/v/invisible-watermark)](https://pypi.org/project/invisible-watermark/)
+# invisible-watermark-gpu
+<!-- [![PyPI](https://img.shields.io/pypi/v/invisible-watermark)](https://pypi.org/project/invisible-watermark/)
 [![License](https://img.shields.io/pypi/l/invisible-watermark.svg)](https://github.com/ShieldMnt/invisible-watermark/blob/main/LICENSE)
 ![Python](https://img.shields.io/badge/python->=3.6-green.svg)
 ![Platform](https://img.shields.io/badge/platform-%20linux%20-green.svg)
-[![Downloads](https://static.pepy.tech/badge/invisible-watermark)](https://pepy.tech/project/invisible-watermark) 
+[![Downloads](https://static.pepy.tech/badge/invisible-watermark)](https://pepy.tech/project/invisible-watermark)  -->
 
-invisible-watermark is a **python** library and command line tool for creating invisible watermark over image (a.k.a. **blink image watermark**, **digital image watermark**). The algorithm doesn't rely on the original image.
+invisible-watermark-gpu is a **python** library and command line tool for creating invisible watermark over image (a.k.a. **blink image watermark**, **digital image watermark**). The algorithm doesn't rely on the original image.
 
-**Note that** this library is still experimental and it doesn't support GPU acceleration, carefully deploy it on the production environment. The default method **dwtDCT**(one variant of frequency methods) is ready for on-the-fly embedding, the other methods are too slow on a CPU only environment.
+**Note that** this library is adapted from `invisible-watermark` in an attempt to optimize the performance and accuracy of a few of the algorithms.
 
+## Installation
+
+```
+# find your GPU's gencode here, and set the PYCUDWT_CC environment variable to it
+# for example, for an A100, it would be "80" for SM80:
+# https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/ 
+# note: if you don't do this, the pycudwt package (discrete wavelets) will NOT work properly, 
+# and it will return only zeros, silently causing you to not be able to decode anything!
+export PYCUDWT_CC=80
+
+pip install git+https://github.com/worldveil/invisible-watermark.git
+```
+
+You may need to ensure that CUDA and `nvcc` binaries are on your path, or even mess with `LD_LIBRARY_PATH` to get it to work.
+
+## ALgorithms
 
 [supported algorithms](https://github.com/ShieldMnt/invisible-watermark#supported-algorithms)
 * [Discrete wavelet transform](https://en.wikipedia.org/wiki/Discrete_wavelet_transform) + [Discrete cosine transform](https://en.wikipedia.org/wiki/Discrete_cosine_transform) frequency embedding algorithm variants.
@@ -36,10 +52,6 @@ accuracy
 > * [Discrete cosine transform](https://en.wikipedia.org/wiki/Discrete_cosine_transform).
 > * [RivaGAN](https://github.com/DAI-Lab/RivaGAN), a deep-learning model trained from Hollywood2 movie clips dataset.
 
-## How to install
-`pip install invisible-watermark`
-
-
 ## [Library API](https://github.com/ShieldMnt/invisible-watermark/wiki/API)
 ### Embed watermark
 
@@ -57,6 +69,15 @@ encoder.set_watermark('bytes', wm.encode('utf-8'))
 bgr_encoded = encoder.encode(bgr, 'dwtDct')
 
 cv2.imwrite('test_wm.png', bgr_encoded)
+```
+
+Note that if you want to avoid the cold start problem of loading CUDA libraries, you'll need to warmup the GPU first. You can do this by running the following code before you start encoding images:
+
+```python
+from imwatermark import WatermarkEncoder
+
+# only supported for method "dwtDct" currently
+WatermarkEncoder().warmup_gpu()
 ```
 
 ### Decode watermark
@@ -120,7 +141,6 @@ Methods are not robust to **resize** or aspect ratio changed **crop** but robust
 
 ### Attack Performance
 
-
 **Watermarked Image**
 
 ![wm](https://user-images.githubusercontent.com/1647036/106387712-03c17400-6416-11eb-9490-e5e860b025ad.png)
@@ -136,8 +156,6 @@ Methods are not robust to **resize** or aspect ratio changed **crop** but robust
 | Resize 50% | ![wm_resize_half](https://user-images.githubusercontent.com/1647036/106387735-15a31700-6416-11eb-8589-2ffa38df2a9a.png) | Fail | Fail |
 | Rotate 30 degress | ![wm_rotate](https://user-images.githubusercontent.com/1647036/106387737-19369e00-6416-11eb-8417-05e53e11b77f.png) | Fail | Fail|
 
-
-
 ### Running Speed (CPU Only)
 | Image | Method | Encoding | Decoding |
 | --- | --- | --- | --- |
@@ -147,6 +165,10 @@ Methods are not robust to **resize** or aspect ratio changed **crop** but robust
 | 600x600 | dwtDct | 70ms | 60ms |
 | 600x600 | dwtDctSvd | 185ms | 320ms |
 | 600x600 | rivaGan | 1s | 600ms |
+
+### Running Speed (GPU Only)
+
+TODO: fill this in!
 
 ### RivaGAN Experimental
 Further, We will deliver the 64bit rivaGan model and test the performance on GPU environment.

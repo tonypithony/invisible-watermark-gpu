@@ -5,21 +5,22 @@ with open('README.md', 'r') as f:
   long_description = f.read()
 
 setuptools.setup(
-  name='invisible-watermark',
-  version='0.2.0',
-  author='Qingquan Wang',
-  author_email='wangqq1103@gmail.com',
-  description='The library for creating and decoding invisible image watermarks',
+  name='invisible-watermark-gpu',
+  version='0.1.0',
+  author='Will Drevo',
+  author_email='will.drevo@gmail.com',
+  description='GPU adaptation for the library for creating and decoding invisible image watermarks',
   long_description=long_description,
   long_description_content_type='text/markdown',
-  url='https://github.com/ShieldMnt/invisible-watermark',
+  url='https://github.com/worldveil/invisible-watermark',
   packages=setuptools.find_packages(),
   install_requires=[
-      'opencv-python>=4.1.0.25',
+      'opencv-python-headless>=4.1.0.25',
       'torch',
       'Pillow>=6.0.0',
       'PyWavelets>=1.1.1',
-      'numpy>=1.17.0'
+      'numpy>=1.17.0',
+      'pycudwt==1.0.2',
   ],
   scripts=['invisible-watermark'],
   classifiers=[

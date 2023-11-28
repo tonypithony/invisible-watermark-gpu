@@ -7,22 +7,13 @@ embed watermark:  ./invisible-watermark -v -a encode -t bytes -m dwtDct -w 'hell
 
 decode watermark: ./invisible-watermark -v -a decode -t bytes -m dwtDct -l 40 ./test_vectors/wm.png
 """
-
 import argparse
-import os
-import shutil
 import sys
 import time
-import uuid
 import cv2
-import base64
 import time
-import pprint
 
 from imwatermark import WatermarkEncoder, WatermarkDecoder
-
-pp = pprint.PrettyPrinter(indent=2)
-
 
 class CustomArgParseFormatter(
     argparse.ArgumentDefaultsHelpFormatter,

@@ -1,42 +1,58 @@
-import struct
-import uuid
-import copy
 import base64
-import cv2
+import logging
+import struct
+import time
+import uuid
+
 import numpy as np
+
 from .maxDct import EmbedMaxDct
 from .dwtDctSvd import EmbedDwtDctSvd
 from .rivaGan import RivaWatermark
-import pprint
 
-pp = pprint.PrettyPrinter(indent=2)
+logger = logging.getLogger(__name__)
+
 
 class WatermarkEncoder(object):
-    def __init__(self, content=b''):
+    def __init__(self, content=b""):
         seq = np.array([n for n in content], dtype=np.uint8)
         self._watermarks = list(np.unpackbits(seq))
         self._wmLen = len(self._watermarks)
-        self._wmType = 'bytes'
+        self._wmType = "bytes"
+
+    def warmup_gpu(self):
+        """
+        Call this function before doing multiple encodes!
+
+        This function is to perform `cuLibraryLoadData` operations which
+        can take a couple of seconds, but are a one-time cost to perform.
+
+        Currently only supports ['dwtDct'] method of encoding.
+        """
+        start = time.time()
+        EmbedMaxDct(self._watermarks, wmLen=self._wmLen)
+        elapsed_ms = (time.time() - start) * 1000.0
+        logger.info(f"GPU warmup completed in {elapsed_ms:.2f} ms")
 
     def set_by_ipv4(self, addr):
         bits = []
-        ips = addr.split('.')
+        ips = addr.split(".")
         for ip in ips:
             bits += list(np.unpackbits(np.array([ip % 255], dtype=np.uint8)))
         self._watermarks = bits
         self._wmLen = len(self._watermarks)
-        self._wmType = 'ipv4'
+        self._wmType = "ipv4"
         assert self._wmLen == 32
 
     def set_by_uuid(self, uid):
         u = uuid.UUID(uid)
-        self._wmType = 'uuid'
+        self._wmType = "uuid"
         seq = np.array([n for n in u.bytes], dtype=np.uint8)
         self._watermarks = list(np.unpackbits(seq))
         self._wmLen = len(self._watermarks)
 
     def set_by_bytes(self, content):
-        self._wmType = 'bytes'
+        self._wmType = "bytes"
         seq = np.array([n for n in content], dtype=np.uint8)
         self._watermarks = list(np.unpackbits(seq))
         self._wmLen = len(self._watermarks)
@@ -44,38 +60,34 @@ class WatermarkEncoder(object):
     def set_by_b16(self, b16):
         content = base64.b16decode(b16)
         self.set_by_bytes(content)
-        self._wmType = 'b16'
+        self._wmType = "b16"
 
     def set_by_bits(self, bits=[]):
         self._watermarks = [int(bit) % 2 for bit in bits]
         self._wmLen = len(self._watermarks)
-        self._wmType = 'bits'
+        self._wmType = "bits"
 
-    def set_watermark(self, wmType='bytes', content=''):
-        if wmType == 'ipv4':
+    def set_watermark(self, wmType="bytes", content=""):
+        if wmType == "ipv4":
             self.set_by_ipv4(content)
-        elif wmType == 'uuid':
+        elif wmType == "uuid":
             self.set_by_uuid(content)
-        elif wmType == 'bits':
+        elif wmType == "bits":
             self.set_by_bits(content)
-        elif wmType == 'bytes':
+        elif wmType == "bytes":
             self.set_by_bytes(content)
-        elif wmType == 'b16':
+        elif wmType == "b16":
             self.set_by_b16(content)
         else:
-            raise NameError('%s is not supported' % wmType)
+            raise NameError("%s is not supported" % wmType)
 
     def get_length(self):
         return self._wmLen
 
-    @classmethod
-    def loadModel(cls):
-        RivaWatermark.loadModel()
-
     def encode(self, cv2Image, method='dwtDct', **configs):
         (r, c, channels) = cv2Image.shape
         if r*c < 256*256:
-            raise RuntimeError('image too small, should be larger than 256x256')
+            raise ValueError('image too small, should be larger than 256x256')
 
         if method == 'dwtDct':
             embed = EmbedMaxDct(self._watermarks, wmLen=self._wmLen, **configs)
@@ -89,36 +101,37 @@ class WatermarkEncoder(object):
         else:
             raise NameError('%s is not supported' % method)
 
+
 class WatermarkDecoder(object):
-    def __init__(self, wm_type='bytes', length=0):
+    def __init__(self, wm_type="bytes", length=0):
         self._wmType = wm_type
-        if wm_type == 'ipv4':
+        if wm_type == "ipv4":
             self._wmLen = 32
-        elif wm_type == 'uuid':
+        elif wm_type == "uuid":
             self._wmLen = 128
-        elif wm_type == 'bytes':
+        elif wm_type == "bytes":
             self._wmLen = length
-        elif wm_type == 'bits':
+        elif wm_type == "bits":
             self._wmLen = length
-        elif wm_type == 'b16':
+        elif wm_type == "b16":
             self._wmLen = length
         else:
-            raise NameError('%s is unsupported' % wm_type)
+            raise NameError("%s is unsupported" % wm_type)
 
     def reconstruct_ipv4(self, bits):
         ips = [str(ip) for ip in list(np.packbits(bits))]
-        return '.'.join(ips)
+        return ".".join(ips)
 
     def reconstruct_uuid(self, bits):
         nums = np.packbits(bits)
-        bstr = b''
+        bstr = b""
         for i in range(16):
-            bstr += struct.pack('>B', nums[i])
+            bstr += struct.pack(">B", nums[i])
 
         return str(uuid.UUID(bytes=bstr))
 
     def reconstruct_bits(self, bits):
-        #return ''.join([str(b) for b in bits])
+        # return ''.join([str(b) for b in bits])
         return bits
 
     def reconstruct_b16(self, bits):
@@ -127,22 +140,22 @@ class WatermarkDecoder(object):
 
     def reconstruct_bytes(self, bits):
         nums = np.packbits(bits)
-        bstr = b''
-        for i in range(self._wmLen//8):
-            bstr += struct.pack('>B', nums[i])
+        bstr = b""
+        for i in range(self._wmLen // 8):
+            bstr += struct.pack(">B", nums[i])
         return bstr
 
     def reconstruct(self, bits):
         if len(bits) != self._wmLen:
-            raise RuntimeError('bits are not matched with watermark length')
+            raise ValueError("bits are not matched with watermark length")
 
-        if self._wmType == 'ipv4':
+        if self._wmType == "ipv4":
             return self.reconstruct_ipv4(bits)
-        elif self._wmType == 'uuid':
+        elif self._wmType == "uuid":
             return self.reconstruct_uuid(bits)
-        elif self._wmType == 'bits':
+        elif self._wmType == "bits":
             return self.reconstruct_bits(bits)
-        elif self._wmType == 'b16':
+        elif self._wmType == "b16":
             return self.reconstruct_b16(bits)
         else:
             return self.reconstruct_bytes(bits)
@@ -150,7 +163,7 @@ class WatermarkDecoder(object):
     def decode(self, cv2Image, method='dwtDct', **configs):
         (r, c, channels) = cv2Image.shape
         if r*c < 256*256:
-            raise RuntimeError('image too small, should be larger than 256x256')
+            raise ValueError('image too small, should be larger than 256x256')
 
         bits = []
         if method == 'dwtDct':
@@ -165,7 +178,3 @@ class WatermarkDecoder(object):
         else:
             raise NameError('%s is not supported' % method)
         return self.reconstruct(bits)
-
-    @classmethod
-    def loadModel(cls):
-        RivaWatermark.loadModel()
