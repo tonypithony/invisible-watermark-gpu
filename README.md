@@ -5,24 +5,41 @@
 ![Platform](https://img.shields.io/badge/platform-%20linux%20-green.svg)
 [![Downloads](https://static.pepy.tech/badge/invisible-watermark)](https://pepy.tech/project/invisible-watermark)  -->
 
-invisible-watermark-gpu is a **python** library and command line tool for creating invisible watermark over image (a.k.a. **blink image watermark**, **digital image watermark**). The algorithm doesn't rely on the original image.
+`invisible-watermark-gpu` is a **python** library and command line tool for creating invisible watermark over image (a.k.a. **blink image watermark**, **digital image watermark**). The algorithm doesn't rely on the original image.
 
 **Note that** this library is adapted from `invisible-watermark` in an attempt to optimize the performance and accuracy of a few of the algorithms.
 
 ## Installation
 
-```
+It's a little more complex than the CPU-only version since we need to make sure we can link to the proper CUDA libraries.
+
+```bash
 # find your GPU's gencode here, and set the PYCUDWT_CC environment variable to it
 # for example, for an A100, it would be "80" for SM80:
 # https://arnon.dk/matching-sm-architectures-arch-and-gencode-for-various-nvidia-cards/ 
-# note: if you don't do this, the pycudwt package (discrete wavelets) will NOT work properly, 
-# and it will return only zeros, silently causing you to not be able to decode anything!
 export PYCUDWT_CC=80
 
-pip install git+https://github.com/worldveil/invisible-watermark.git
+# also, load your CUDA version and set any and all needed environment variables. this might
+# depend on your CUDA version + GPU type. I'm using CUDA 12.1 on an A100
+module load cuda/12.1
+export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/cuda/lib64
+export CUDA_PATH=/usr/local/cuda
+export PYCUDWT_CC=80
+export CUDAHOME=/usr/local/cuda-12.1
+
+# install !
+pip install git+https://github.com/worldveil/invisible-watermark.git  --no-cache-dir
 ```
 
-You may need to ensure that CUDA and `nvcc` binaries are on your path, or even mess with `LD_LIBRARY_PATH` to get it to work.
+You should NOT proceed until this test passes:
+
+```bash
+# without this test passing, your pycudwt package will NOT work properly, and it will
+# only output zeros, silently causing you to not be able to decode anything!
+python -m pytest -k 'test_pycudwt_installed_correctly'
+```
+
+Once that works, you should be off to the races!
 
 ## ALgorithms
 

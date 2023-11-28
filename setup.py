@@ -15,12 +15,13 @@ setuptools.setup(
   url='https://github.com/worldveil/invisible-watermark',
   packages=setuptools.find_packages(),
   install_requires=[
-      'opencv-python-headless>=4.1.0.25',
-      'torch',
-      'Pillow>=6.0.0',
+      'opencv-python==4.8.1.78',
+      'torch==2.1.1',
+      'Pillow==10.1.0',
       'PyWavelets>=1.1.1',
-      'numpy>=1.17.0',
+      'numpy==1.26.2',
       'pycudwt==1.0.2',
+      'pytest',
   ],
   scripts=['invisible-watermark'],
   classifiers=[
