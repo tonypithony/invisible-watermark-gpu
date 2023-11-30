@@ -6,7 +6,7 @@ with open('README.md', 'r') as f:
 
 setuptools.setup(
   name='invisible-watermark-gpu',
-  version='0.1.0',
+  version='0.2.0',
   author='Will Drevo',
   author_email='will.drevo@gmail.com',
   description='GPU adaptation for the library for creating and decoding invisible image watermarks',
@@ -20,8 +20,7 @@ setuptools.setup(
       'Pillow>=6.0.0',
       'PyWavelets>=1.1.1',
       'numpy>=1.17.0',
-      # 'pycudwt==1.0.2',  # this is our old dependency, we replace with one below to compile for multiple GPUs
-      'pycudwt @ git+https://github.com/worldveil/pypwt@9f062ebdee4ab97d9df783c3521524fe5d3281dd#egg=pycudwt',
+      'pycudwt-multitarget==1.0.5',
       'pytest',
   ],
   scripts=['invisible-watermark'],

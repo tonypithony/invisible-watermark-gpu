@@ -1,5 +1,7 @@
 # invisible-watermark-gpu
-<!-- [![PyPI](https://img.shields.io/pypi/v/invisible-watermark)](https://pypi.org/project/invisible-watermark/)
+[![PyPI](https://img.shields.io/pypi/v/invisible-watermark-gpu)](https://pypi.org/project/invisible-watermark-gpu/)
+
+<!-- 
 [![License](https://img.shields.io/pypi/l/invisible-watermark.svg)](https://github.com/ShieldMnt/invisible-watermark/blob/main/LICENSE)
 ![Python](https://img.shields.io/badge/python->=3.6-green.svg)
 ![Platform](https://img.shields.io/badge/platform-%20linux%20-green.svg)
@@ -28,7 +30,7 @@ export PYCUDWT_CC=80
 export CUDAHOME=/usr/local/cuda-12.1
 
 # install !
-pip install git+https://github.com/worldveil/invisible-watermark.git  --no-cache-dir
+pip install invisible-watermark-gpu --no-cache-dir
 ```
 
 You should NOT proceed until this test passes:
