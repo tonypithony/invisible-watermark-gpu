@@ -21,7 +21,7 @@ setuptools.setup(
       'PyWavelets>=1.1.1',
       'numpy>=1.17.0',
       # 'pycudwt==1.0.2',  # this is our old dependency, we replace with one below to compile for multiple GPUs
-      'pycudwt @ git+https://github.com/worldveil/pypwt@v1.1#egg=pycudwt',
+      'pycudwt @ git+https://github.com/worldveil/pypwt@9f062ebdee4ab97d9df783c3521524fe5d3281dd#egg=pycudwt',
       'pytest',
   ],
   scripts=['invisible-watermark'],
