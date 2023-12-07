@@ -6,13 +6,13 @@ with open('README.md', 'r') as f:
 
 setuptools.setup(
   name='invisible-watermark-gpu',
-  version='0.2.0',
+  version='0.2.2',
   author='Will Drevo',
-  author_email='will.drevo@gmail.com',
+  author_email='will.drevo@stability.ai',
   description='GPU adaptation for the library for creating and decoding invisible image watermarks',
   long_description=long_description,
   long_description_content_type='text/markdown',
-  url='https://github.com/worldveil/invisible-watermark',
+  url='https://github.com/Stability-AI/invisible-watermark-gpu',
   packages=setuptools.find_packages(),
   install_requires=[
       'opencv-python>=4.1.0.25',
