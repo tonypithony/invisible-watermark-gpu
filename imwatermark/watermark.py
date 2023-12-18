@@ -20,6 +20,10 @@ class WatermarkEncoder(object):
         self._wmLen = len(self._watermarks)
         self._wmType = "bytes"
 
+    @classmethod
+    def loadModel(cls):
+        RivaWatermark.loadModel()
+
     def warmup_gpu(self):
         """
         Call this function before doing multiple encodes!

@@ -6,7 +6,7 @@ with open('README.md', 'r') as f:
 
 setuptools.setup(
   name='invisible-watermark-gpu',
-  version='0.2.2',
+  version='0.2.3',
   author='Will Drevo',
   author_email='will.drevo@stability.ai',
   description='GPU adaptation for the library for creating and decoding invisible image watermarks',
@@ -15,7 +15,7 @@ setuptools.setup(
   url='https://github.com/Stability-AI/invisible-watermark-gpu',
   packages=setuptools.find_packages(),
   install_requires=[
-      'opencv-python>=4.1.0.25',
+      'opencv-python-headless==4.8.0.76',
       'torch>=2.0.0',
       'Pillow>=6.0.0',
       'PyWavelets>=1.1.1',
