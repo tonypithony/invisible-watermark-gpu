@@ -15,7 +15,7 @@ setuptools.setup(
   url='https://github.com/Stability-AI/invisible-watermark-gpu',
   packages=setuptools.find_packages(),
   install_requires=[
-      'opencv-python-headless==4.8.0.76',
+      'opencv-python-headless>=4.8.1.78',
       'torch>=2.0.0',
       'Pillow>=6.0.0',
       'PyWavelets>=1.1.1',
