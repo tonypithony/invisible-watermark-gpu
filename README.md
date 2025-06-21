@@ -1,3 +1,15 @@
+## dwtDct
+![](https://raw.githubusercontent.com/tonypithony/invisible-watermark-gpu/refs/heads/main/Bcolordiff_for_test_wm_dwtDct.png)
+
+
+## dwtDctSvd
+![](https://raw.githubusercontent.com/tonypithony/invisible-watermark-gpu/refs/heads/main/Bcolordiff_for_test_wm_dwtDctSvd.png)
+
+
+## dwtRivaGAN
+![](https://raw.githubusercontent.com/tonypithony/invisible-watermark-gpu/refs/heads/main/Bcolordiff_for_test_wm_rivaGan.png)
+
+
 # invisible-watermark-gpu
 [![PyPI](https://img.shields.io/pypi/v/invisible-watermark-gpu)](https://pypi.org/project/invisible-watermark-gpu/)
 
